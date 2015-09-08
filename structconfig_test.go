@@ -33,15 +33,40 @@ func TestString(t *testing.T) {
 	c := NewConfig()
 	s := String(c)
 	assert.Contains(t, s, "BoolValue=false")
-	assert.Contains(t, s, "IntValue=1000")
-	assert.Contains(t, s, "Int32Value=0")
-	assert.Contains(t, s, "Int64Value=0")
-	assert.Contains(t, s, "Float64Value=5")
 	assert.Contains(t, s, "BoolValueWithDefault=true")
-	assert.Contains(t, s, `StringValue="default string value"`)
+	assert.Contains(t, s, "IntValue=1000")
 	assert.Contains(t, s, "Int8Value=0")
 	assert.Contains(t, s, "Int16Value=0")
+	assert.Contains(t, s, "Int32Value=0")
+	assert.Contains(t, s, "Int64Value=0")
 	assert.Contains(t, s, "Float32Value=0")
+	assert.Contains(t, s, "Float64Value=5")
+	assert.Contains(t, s, `StringValue="default string value"`)
+}
+
+func TestMap(t *testing.T) {
+	c := NewConfig()
+	m := Map(c)
+
+	var ok bool
+	_, ok = m["BoolValue"].(bool)
+	assert.True(t, ok)
+	_, ok = m["IntValue"].(int)
+	assert.True(t, ok)
+	_, ok = m["Int8Value"].(int8)
+	assert.True(t, ok)
+	_, ok = m["Int16Value"].(int16)
+	assert.True(t, ok)
+	_, ok = m["Int32Value"].(int32)
+	assert.True(t, ok)
+	_, ok = m["Int64Value"].(int64)
+	assert.True(t, ok)
+	_, ok = m["Float32Value"].(float32)
+	assert.True(t, ok)
+	_, ok = m["Float64Value"].(float64)
+	assert.True(t, ok)
+	_, ok = m["StringValue"].(string)
+	assert.True(t, ok)
 }
 
 func TestUpdateStringFromEnviron(t *testing.T) {

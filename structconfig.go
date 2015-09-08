@@ -23,6 +23,15 @@ func FromEnviron(config interface{}, environ []string) {
 	internal.Decode(update, config)
 }
 
+func Map(config interface{}) map[string]interface{} {
+	fields := internal.NewFields(config)
+	result := map[string]interface{}{}
+	for name, field := range fields {
+		result[name] = field.Value.Interface()
+	}
+	return result
+}
+
 func String(config interface{}) string {
 	fields := internal.NewFields(config)
 	buffer := []string{}
