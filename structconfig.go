@@ -8,36 +8,50 @@ import (
 	"github.com/artnez/structconfig/internal"
 )
 
+type Field struct {
+	Name  string
+	Value interface{}
+}
+
 func FromEnviron(config interface{}, environ []string) {
-	fields := internal.NewFields(config)
+	fields := internal.NewFields(config, true)
 	tags := fields.Tags("env")
 	values := internal.NewEnviron(environ)
 	update := map[string]interface{}{}
-	for name := range fields {
-		if tag, ok := tags[name]; ok {
-			if value, ok := values[tag]; ok {
-				update[name] = value
+	for _, field := range fields {
+		if tag, ok := tags[field.Name]; ok {
+			if value, ok := values[tag.Name]; ok {
+				update[field.Name] = value
 			}
 		}
 	}
 	internal.Decode(update, config)
 }
 
-func Map(config interface{}) map[string]interface{} {
-	fields := internal.NewFields(config)
-	result := map[string]interface{}{}
-	for name, field := range fields {
-		result[name] = field.Value.Interface()
+func Slice(config interface{}, withSecrets bool) []Field {
+	fields := internal.NewFields(config, withSecrets)
+	result := []Field{}
+	for _, field := range fields {
+		result = append(result, Field{field.Name, field.Value.Interface()})
 	}
 	return result
 }
 
-func String(config interface{}) string {
-	fields := internal.NewFields(config)
+func Map(config interface{}, withSecrets bool) map[string]interface{} {
+	fields := internal.NewFields(config, withSecrets)
+	result := map[string]interface{}{}
+	for _, field := range fields {
+		result[field.Name] = field.Value.Interface()
+	}
+	return result
+}
+
+func String(config interface{}, withSecrets bool) string {
+	fields := internal.NewFields(config, withSecrets)
 	buffer := []string{}
-	for name, field := range fields {
+	for _, field := range fields {
 		value, _ := json.Marshal(field.Value.Interface())
-		buffer = append(buffer, fmt.Sprintf("%s=%s", name, value))
+		buffer = append(buffer, fmt.Sprintf("%s=%s", field.Name, value))
 	}
 	return strings.Join(buffer, ", ")
 }

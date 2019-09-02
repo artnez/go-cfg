@@ -13,11 +13,12 @@ type Config struct {
 	Int8Value            int8   `env:"INT8_VALUE"`
 	Int16Value           int16  `env:"INT16_VALUE"`
 	Int32Value           int32
-	Int64Value           int64   `env:"INT64_VALUE"`
+	Int64Value           int64   `env:"INT64_VALUE",json:"IGNORE_THIS_FIELD"`
 	Float32Value         float32 `env:"FLOAT32_VALUE"`
 	Float64Value         float64 `env:"FLOAT64_VALUE"`
 	BoolValue            bool    `env:"BOOL_VALUE"`
 	BoolValueWithDefault bool    `env:"BOOL_VALUE_WITH_DEFAULT"`
+	SecretStringValue    string  `env:"SECRET_STRING_VALUE,secret"`
 }
 
 func NewConfig() *Config {
@@ -26,12 +27,13 @@ func NewConfig() *Config {
 		IntValue:             1000,
 		Float64Value:         5.0,
 		BoolValueWithDefault: true,
+		SecretStringValue:    "SECRET!",
 	}
 }
 
 func TestString(t *testing.T) {
 	c := NewConfig()
-	s := String(c)
+	s := String(c, true)
 	assert.Contains(t, s, "BoolValue=false")
 	assert.Contains(t, s, "BoolValueWithDefault=true")
 	assert.Contains(t, s, "IntValue=1000")
@@ -42,11 +44,16 @@ func TestString(t *testing.T) {
 	assert.Contains(t, s, "Float32Value=0")
 	assert.Contains(t, s, "Float64Value=5")
 	assert.Contains(t, s, `StringValue="default string value"`)
+	assert.Contains(t, s, `SecretStringValue="SECRET!"`)
+	assert.NotContains(t, s, "IGNORE_THIS_FIELD")
+
+	s = String(c, false)
+	assert.NotContains(t, s, `SecretStringValue="SECRET!"`)
 }
 
 func TestMap(t *testing.T) {
 	c := NewConfig()
-	m := Map(c)
+	m := Map(c, true)
 
 	var ok bool
 	_, ok = m["BoolValue"].(bool)
@@ -67,14 +74,64 @@ func TestMap(t *testing.T) {
 	assert.True(t, ok)
 	_, ok = m["StringValue"].(string)
 	assert.True(t, ok)
+
+	m = Map(c, false)
+	_, ok = m["SecretStringValue"].(string)
+	assert.True(t, !ok)
+}
+
+func TestSlice(t *testing.T) {
+	c := NewConfig()
+	m := Slice(c, true)
+
+	var ok bool
+	var found bool
+
+	assert.Equal(t, "StringValue", m[0].Name)
+	_, ok = m[0].Value.(string)
+	assert.True(t, ok)
+
+	assert.Equal(t, "IntValue", m[1].Name)
+	_, ok = m[1].Value.(int)
+	assert.True(t, ok)
+
+	assert.Equal(t, "Int8Value", m[2].Name)
+	_, ok = m[2].Value.(int8)
+	assert.True(t, ok)
+
+	assert.Equal(t, "Int16Value", m[3].Name)
+	_, ok = m[3].Value.(int16)
+	assert.True(t, ok)
+
+	found = false
+	for _, field := range m {
+		if field.Name == "SecretStringValue" {
+			found = true
+			break
+		}
+	}
+	assert.True(t, found)
+
+	m = Slice(c, false)
+	found = false
+	for _, field := range m {
+		if field.Name == "SecretStringValue" {
+			found = true
+			break
+		}
+	}
+	assert.True(t, !found)
 }
 
 func TestUpdateStringFromEnviron(t *testing.T) {
 	os.Setenv("STRING_VALUE", "new string value")
+	os.Setenv("SECRET_STRING_VALUE", "ssshhh")
 	c := NewConfig()
 	assert.Equal(t, "default string value", c.StringValue)
+	assert.Equal(t, "SECRET!", c.SecretStringValue)
 	FromEnviron(c, os.Environ())
 	assert.Equal(t, "new string value", c.StringValue)
+	assert.Equal(t, "ssshhh", c.SecretStringValue)
 }
 
 func TestUpdateIntFromEnviron(t *testing.T) {
