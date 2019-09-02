@@ -1,7 +1,5 @@
 [![Build Status](https://travis-ci.org/artnez/structconfig.svg?branch=master)](http://travis-ci.org/artnez/structconfig)
 
-Not ready for prime time.
-
 ```go
 package main
 
