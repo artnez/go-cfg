@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/artnez/structconfig/internal"
+	"github.com/artnez/structconfig/v2/internal"
 )
 
 type Field struct {
