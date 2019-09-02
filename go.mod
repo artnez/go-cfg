@@ -1,4 +1,4 @@
-module github.com/artnez/structconfig
+module github.com/artnez/structconfig/v2
 
 go 1.12
 
