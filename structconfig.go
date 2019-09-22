@@ -11,6 +11,7 @@ import (
 type Field struct {
 	Name  string
 	Value interface{}
+	Tag   string
 }
 
 func FromEnviron(config interface{}, environ []string) {
@@ -32,7 +33,7 @@ func Slice(config interface{}, withSecrets bool) []Field {
 	fields := internal.NewFields(config, withSecrets)
 	result := []Field{}
 	for _, field := range fields {
-		result = append(result, Field{field.Name, field.Value.Interface()})
+		result = append(result, Field{field.Name, field.Value.Interface(), field.Tag.Get("env")})
 	}
 	return result
 }

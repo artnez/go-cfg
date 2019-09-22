@@ -88,18 +88,22 @@ func TestSlice(t *testing.T) {
 	var found bool
 
 	assert.Equal(t, "StringValue", m[0].Name)
+	assert.Equal(t, "STRING_VALUE", m[0].Tag)
 	_, ok = m[0].Value.(string)
 	assert.True(t, ok)
 
 	assert.Equal(t, "IntValue", m[1].Name)
+	assert.Equal(t, "INT_VALUE", m[1].Tag)
 	_, ok = m[1].Value.(int)
 	assert.True(t, ok)
 
 	assert.Equal(t, "Int8Value", m[2].Name)
+	assert.Equal(t, "INT8_VALUE", m[2].Tag)
 	_, ok = m[2].Value.(int8)
 	assert.True(t, ok)
 
 	assert.Equal(t, "Int16Value", m[3].Name)
+	assert.Equal(t, "INT16_VALUE", m[3].Tag)
 	_, ok = m[3].Value.(int16)
 	assert.True(t, ok)
 
